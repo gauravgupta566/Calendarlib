@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		HashSet<Date> events = new HashSet<>();
+		/*HashSet<Date> events = new HashSet<>();
 		events.add(new Date());
 
 		CalendarView cv = ((CalendarView)findViewById(R.id.calendar_view));
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity
 				DateFormat df = SimpleDateFormat.getDateInstance();
 				Toast.makeText(MainActivity.this, df.format(date), Toast.LENGTH_SHORT).show();
 			}
-		});
+		});*/
 	}
 
 	}

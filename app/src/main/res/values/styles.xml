@@ -7,4 +7,29 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+
+    <!--adding custom calendar lib-->
+    <style name="CalendarMonthText">
+        <item name="android:textSize">@dimen/spacing_normal</item>
+        <item name="android:textColor">@color/calendar_day_of_the_month_font</item>
+        <!-- <item name="fontPath">fonts/Cabin-Regular.ttf</item>-->
+    </style>
+
+    <style name="CalendarMonthArrow">
+        <item name="android:tint">@color/calendar_day_of_the_month_font</item>
+    </style>
+
+    <style name="CalendarDayOfTheWeekText">
+        <item name="android:textSize">@dimen/text_size_12</item>
+        <item name="android:textColor">@color/calendar_day_of_the_month_font</item>
+        <!-- <item name="fontPath">fonts/Cabin-Regular.ttf</item>-->
+    </style>
+
+    <style name="CalendarDayOfTheMonthText">
+        <item name="android:textSize">@dimen/text_size_12</item>
+        <item name="android:textColor">@color/calendar_day_of_the_month_font</item>
+        <!-- <item name="fontPath">fonts/Cabin-Bold.ttf</item>-->
+    </style>
+
+    <dimen name="text_size_12">12dp</dimen>
 </resources>

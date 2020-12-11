@@ -11,4 +11,15 @@
     <color name="fall">#44d8d27e</color>
     <color name="winter">#44a1c1da</color>
     <color name="spring">#448da64b</color>
+
+
+    <!--calendar lib-->
+    <color name="calendar_circle_1">#EB5757</color>
+    <color name="calendar_circle_2">#55C6DA</color>
+    <color name="calendar_month_font">#2A99BC</color>
+    <color name="calendar_day_of_the_week_font">#161d20</color>
+    <color name="calendar_selected_day_background">#20BEB2</color>
+    <color name="calendar_current_day_ring">#CCCCCC</color>
+    <color name="calendar_day_of_the_month_font">#4F4F4F</color>
+
 </resources>
