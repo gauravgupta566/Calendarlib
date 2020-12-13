@@ -98,15 +98,17 @@ class QubeCalendarView @JvmOverloads constructor(
        }
         var previousOrFuture=false
         if (selectedYear==todayYear){
-            if (selectedMonth==todayMonth)
-            previousOrFuture=true
-        }
+            if (selectedMonth<todayMonth!!)previousOrFuture=true
+           }
+
+        if (selectedYear<todayYear!!)previousOrFuture=true
+
         for (i in 1..maxdate) {
             list.add((CalendarDateModel(i.toString(),previousOrFuture)))
         }
 
         var daysCount = 42
-        if (firstDayOfMonth < 5) {
+        if (firstDayOfMonth < 4) {
             daysCount = 35
         }
         //futureDates

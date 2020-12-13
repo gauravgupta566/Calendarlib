@@ -12,7 +12,6 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CalendarViewHolder {
         return CalendarViewHolder.create(parent).apply {
             itemView.dayTv.setOnClickListener {
-            Log.d("hello",itemView.dayTv.text.toString())
             }
         }
     }
