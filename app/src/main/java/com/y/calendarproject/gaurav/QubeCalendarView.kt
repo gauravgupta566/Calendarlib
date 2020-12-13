@@ -118,4 +118,17 @@ class QubeCalendarView @JvmOverloads constructor(
         calendarAdapter.populateDates(list)
     }
 
+    fun setMonthlyFrequency(interval:Int){
+
+    }
+
+    fun setWeeklyFrequency(interval:Int,days:Int){
+
+    }
+
+    fun setYearlyFrequency(){
+
+    }
+
+
 }
