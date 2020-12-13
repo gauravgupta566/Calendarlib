@@ -7,35 +7,59 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import com.y.calendarproject.R
+import kotlinx.android.synthetic.main.calendar_month_layout.view.*
 import kotlinx.android.synthetic.main.calendar_view_layout.view.*
+import java.text.DateFormatSymbols
 import java.util.*
 import kotlin.collections.ArrayList
 
 class QubeCalendarView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
-    var list = ArrayList<String>()
+    var list = mutableListOf<CalendarDateModel>()
 
     var view: View? = null
     var currentCalendar: Calendar? = null
     var todayCalendar: Calendar? = null
-    var calendarAdapter: CalendarAdapter? = null
+    var todayDate: Date? = null
+    var todayYear: Int? = null
+    var todayMonth: Int? = null
+
+
+    var calendarAdapter= CalendarAdapter()
 
 
     init {
         view = LayoutInflater.from(context).inflate(R.layout.calendar_view_layout, this, true)
-        loadDates(attrs)
+        calendarRecyclerView.adapter = calendarAdapter
+        getCurrentCalendarDetails()
+
     }
 
-    private fun loadDates(attrs: AttributeSet?) {
+    private fun getCurrentCalendarDetails() {
         currentCalendar = Calendar.getInstance()
         todayCalendar = currentCalendar
+        todayDate = todayCalendar?.time
+        todayYear = todayCalendar?.get(Calendar.YEAR)
+        todayMonth = todayCalendar?.get(Calendar.MONTH)
 
-        val day1 = currentCalendar?.get(Calendar.DAY_OF_WEEK)
-        Log.d("hello first1", day1.toString())
+        leftCalendarButton.setOnClickListener {
+           changeCalendarMonth(-1)
+        }
+        rightCalendarButton.setOnClickListener {
+            changeCalendarMonth(1)
+        }
+        updateView()
+    }
 
-        val day2 = currentCalendar?.get(Calendar.DAY_OF_MONTH)
-        Log.d("hello first2", day2.toString())
+    private fun changeCalendarMonth(i: Int) {
+        currentCalendar?.add(Calendar.MONTH, i)
+        updateView()
+    }
+
+    private fun updateView() {
+
+        list.clear()
 
 
         val auxCalendar =
@@ -44,33 +68,52 @@ class QubeCalendarView @JvmOverloads constructor(
         auxCalendar[Calendar.DAY_OF_MONTH] = 1
 
         val firstDayOfMonth = auxCalendar[Calendar.DAY_OF_WEEK]
-        Log.d("hello first3", firstDayOfMonth.toString())
 
         val maxdate = auxCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
-        Log.d("hello first4", maxdate.toString())
+
+        val selectedYear=auxCalendar.get(Calendar.YEAR)
+        val selectedMonth=auxCalendar.get(Calendar.MONTH)
+        val selectedDate=auxCalendar.time
+        var dateText = DateFormatSymbols(Locale.getDefault()).months[currentCalendar!![Calendar.MONTH]]
+
+        dateText = dateText.substring(0, 1).toUpperCase() + dateText.subSequence(1, dateText.length)
+
 
         auxCalendar.add(Calendar.MONTH, -1)
         val previousMaxdate = auxCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
 
         //previous dates
-       var dd= previousMaxdate -(firstDayOfMonth-2)
-        for (i in dd..previousMaxdate) {
-            list.add((i).toString())
+        val previousDateStart = previousMaxdate - (firstDayOfMonth - 2)
+        for (i in previousDateStart..previousMaxdate) {
+            list.add((CalendarDateModel(i.toString(),true)))
         }
 
         // current dates
+       if (selectedYear!=todayYear){
+           monthTitleCalendar.text= "$dateText $selectedYear"
+       }
+      else {
+           monthTitleCalendar.text= "$dateText"
+       }
+        var previousOrFuture=false
+        if (selectedYear==todayYear){
+            if (selectedMonth==todayMonth)
+            previousOrFuture=true
+        }
         for (i in 1..maxdate) {
-            list.add((i).toString())
+            list.add((CalendarDateModel(i.toString(),previousOrFuture)))
         }
 
+        var daysCount = 42
+        if (firstDayOfMonth < 5) {
+            daysCount = 35
+        }
         //futureDates
-        for (i in 1..(35 - list.size)) {
-            list.add((i).toString())
+        for (i in 1..(daysCount - list.size)) {
+            list.add((CalendarDateModel(i.toString(),true)))
         }
-        calendarAdapter = CalendarAdapter(list)
-        calendarRecyclerView.adapter = calendarAdapter
-
+        calendarAdapter.populateDates(list)
     }
 
 }
