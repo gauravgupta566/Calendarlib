@@ -1,6 +1,5 @@
 package com.y.calendarproject.gaurav
 
-import android.util.Log
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_days.view.*
