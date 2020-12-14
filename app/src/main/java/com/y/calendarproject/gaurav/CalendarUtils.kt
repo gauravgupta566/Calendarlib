@@ -30,7 +30,7 @@ class CalendarUtils {
 
         var selectedFrequency = 1
 
-        var selectedInterval = 11
+        var selectedInterval = 15
 
         var selectedday = 211
 

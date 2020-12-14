@@ -147,7 +147,6 @@ public class CalendarView extends LinearLayout
 		// long-pressing a day
 		grid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
 		{
-
 			@Override
 			public boolean onItemLongClick(AdapterView<?> view, View cell, int position, long id)
 			{
