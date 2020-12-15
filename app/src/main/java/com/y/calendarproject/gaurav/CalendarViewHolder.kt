@@ -22,7 +22,7 @@ import kotlinx.android.synthetic.main.item_days.view.*
         else{
             itemView.dayTv.setTextColor(ContextCompat.getColor(itemView.context,R.color.grey))
             if (model.selectedDate){
-                itemView.dayTv.background= ContextCompat.getDrawable(itemView.context,R.drawable.bg_date_selected)
+                itemView.dayTv.background= ContextCompat.getDrawable(itemView.context,R.drawable.bg_date_selected_bill_qube)
                 tvSelected=itemView.dayTv
 
             }

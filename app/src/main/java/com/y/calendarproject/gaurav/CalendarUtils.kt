@@ -19,20 +19,17 @@ class CalendarUtils {
         val twoWeek = 22
 
         //weekdays
+        val sunday = 1
+        val monday = 2
+        val tuesday = 3
+        val wednesday = 4
+        val thrusday = 5
+        val friday = 6
+        val saturday = 7
 
-        val monday = 211
-        val tuesday = 212
-        val wednesday = 213
-        val thrusday = 214
-        val friday = 215
-        val saturday = 216
-        val sunday = 217
-
-        var selectedFrequency = 1
-
-        var selectedInterval = 15
-
-        var selectedday = 211
+        var selectedFrequency = 2
+        var selectedInterval = 22
+        var selectedday = 5
 
 
     }

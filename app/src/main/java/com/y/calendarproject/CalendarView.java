@@ -201,8 +201,8 @@ public class CalendarView extends LinearLayout
 		int month = currentDate.get(Calendar.MONTH);
 		int season = monthSeason[month];
 		int color = rainbow[season];
-
 		header.setBackgroundColor(getResources().getColor(color));
+
 	}
 
 

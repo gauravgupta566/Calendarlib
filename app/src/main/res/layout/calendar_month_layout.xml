@@ -40,7 +40,6 @@
         app:srcCompat="@drawable/ic_right_arrow"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
