@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.Toast
 import com.y.calendarproject.R
 import kotlinx.android.synthetic.main.calendar_month_layout.view.*
 import kotlinx.android.synthetic.main.calendar_view_layout.view.*
@@ -23,6 +24,8 @@ class QubeCalendarView @JvmOverloads constructor(
     private var todayDate: Date? = null
     private var todayYear: Int? = null
     private var todayMonth: Int? = null
+    private var todayMonthStartDate=0
+
     private var defaultSelectedDate: Int? = null
 
 
@@ -34,10 +37,8 @@ class QubeCalendarView @JvmOverloads constructor(
     private var firstDate = 0
     private var secondDate = 0
 
-    private var selectedDateYear=0
-    private var selectedMonthYear=-1
-
-
+    private var selectedDateForYearlyFrequency = 0
+    private var selectedMonthYearlyFrequency = -1
 
 
     private val listener by lazy {
@@ -50,10 +51,10 @@ class QubeCalendarView @JvmOverloads constructor(
             }
 
             override fun twiceDateSelected(firstDay: Int, secondDay: Int) {
-                Log.d("hello overide",CalendarUtils.selectedInterval.toString())
+                Log.d("hello overide", CalendarUtils.selectedInterval.toString())
 
                 firstDate = firstDay
-                secondDate=secondDay
+                secondDate = secondDay
                 updateView()
             }
 
@@ -78,9 +79,9 @@ class QubeCalendarView @JvmOverloads constructor(
                 updateView()
             }
 
-            override fun yearlySelected(date: Int,month:Int) {
-             selectedDateYear=date
-             selectedMonthYear=month
+            override fun yearlySelected(date: Int) {
+                selectedDateForYearlyFrequency = date
+                selectedMonthYearlyFrequency = currentCalendar!![Calendar.MONTH]
                 updateView()
             }
         }
@@ -91,11 +92,11 @@ class QubeCalendarView @JvmOverloads constructor(
         view = LayoutInflater.from(context).inflate(R.layout.calendar_view_layout, this, true)
         calendarRecyclerView.adapter = calendarAdapter
         calendarAdapter.setCalendarListener(listener)
-        getCurrentCalendarDetails()
+        getCurrentCalendarDetails(context)
 
     }
 
-    private fun getCurrentCalendarDetails() {
+    private fun getCurrentCalendarDetails(context: Context) {
         currentCalendar = Calendar.getInstance()
         todayCalendar = currentCalendar
         todayDate = todayCalendar?.time
@@ -104,8 +105,15 @@ class QubeCalendarView @JvmOverloads constructor(
         defaultSelectedDate = todayCalendar?.get(Calendar.DATE)
 
         leftCalendarButton.setOnClickListener {
+
+            //set Calendar Title
+            if ((currentCalendar!![Calendar.YEAR] == todayYear) && (currentCalendar!![Calendar.MONTH] == todayMonth)) {
+                Toast.makeText(context, "You cannot go to previous month", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
             if ((CalendarUtils.selectedInterval > 11) && (CalendarUtils.selectedInterval <= 15)) {
-                if (CalendarUtils.selectedInterval!=12){
+                if (CalendarUtils.selectedInterval != 12) {
                     monthChanges--
                     if (monthChanges == 0) {
                         monthChanges = monthIntervalGap
@@ -116,7 +124,7 @@ class QubeCalendarView @JvmOverloads constructor(
         }
         rightCalendarButton.setOnClickListener {
             if ((CalendarUtils.selectedInterval > 11) && (CalendarUtils.selectedInterval <= 15)) {
-                if (CalendarUtils.selectedInterval!=12){
+                if (CalendarUtils.selectedInterval != 12) {
                     if (monthChanges == monthIntervalGap) {
                         monthChanges = 0
                     }
@@ -125,22 +133,28 @@ class QubeCalendarView @JvmOverloads constructor(
             }
             changeCalendarMonth(1)
         }
-
         updateView()
     }
 
     private fun changeCalendarMonth(i: Int) {
         currentCalendar?.add(Calendar.MONTH, i)
+      val month=  currentCalendar?.get(Calendar.MONTH)
+
+        Log.d("hello",month.toString())
         updateView()
     }
 
     private fun updateView() {
-
         list.clear()
 
         val auxCalendar =
             Calendar.getInstance(Locale.getDefault())
         auxCalendar.time = currentCalendar?.time
+
+        if (todayMonthStartDate==0){
+            todayMonthStartDate=auxCalendar[Calendar.DAY_OF_MONTH]
+       }
+
         auxCalendar[Calendar.DAY_OF_MONTH] = 1
 
         val firstDayOfMonth = auxCalendar[Calendar.DAY_OF_WEEK]
@@ -148,7 +162,9 @@ class QubeCalendarView @JvmOverloads constructor(
         val maxdate = auxCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
         val selectedYear = auxCalendar.get(Calendar.YEAR)
-        val selectedMonth = auxCalendar.get(Calendar.MONTH)
+
+        //set Calendar Month Title
+
         var dateText =
             DateFormatSymbols(Locale.getDefault()).months[currentCalendar!![Calendar.MONTH]]
 
@@ -156,25 +172,29 @@ class QubeCalendarView @JvmOverloads constructor(
             1,
             dateText.length
         )
+        if (selectedYear != todayYear) {
+            monthTitleCalendar.text = "$dateText $selectedYear"
+        } else {
+            monthTitleCalendar.text = dateText
+        }
 
 
         auxCalendar.add(Calendar.MONTH, -1)
         val previousMaxdate = auxCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
+        //Previous Dates
+        setPreviousMonthLastDays(previousMaxdate, firstDayOfMonth)
 
-        //previous dates
-        setPreviousDays(previousMaxdate, firstDayOfMonth)
+        // Current Month Dates
+        setCurrentMonthDays(maxdate)
 
-        // current dates
-        setCurrentdays(selectedYear, dateText, selectedMonth, maxdate)
-
-        //futureDates
-        setFutureDays(firstDayOfMonth)
+        //Upcoming Dates
+        setUpcomingMonthDays(firstDayOfMonth)
 
         calendarAdapter.populateDates(list)
     }
 
-    private fun setFutureDays(firstDayOfMonth: Int) {
+    private fun setUpcomingMonthDays(firstDayOfMonth: Int) {
         var daysCount = 42
         if (firstDayOfMonth < 4) {
             daysCount = 35
@@ -184,205 +204,198 @@ class QubeCalendarView @JvmOverloads constructor(
         }
     }
 
-    private fun setPreviousDays(previousMaxdate: Int, firstDayOfMonth: Int) {
+    private fun setPreviousMonthLastDays(previousMaxdate: Int, firstDayOfMonth: Int) {
         val previousDateStart = previousMaxdate - (firstDayOfMonth - 2)
         for (i in previousDateStart..previousMaxdate) {
             list.add((CalendarDateModel(i.toString(), true, false)))
         }
     }
 
-    private fun setCurrentdays(
-        selectedYear: Int,
-        dateText: String,
-        selectedMonth: Int,
+    private fun setCurrentMonthDays(
         maxdate: Int
     ) {
-        if (selectedYear != todayYear) {
-            monthTitleCalendar.text = "$dateText $selectedYear"
-        } else {
-            monthTitleCalendar.text = dateText
-        }
-        var previousOrFuture = false
-        if (selectedYear == todayYear) {
-            if (selectedMonth < todayMonth!!) previousOrFuture = true
-        }
 
-        if (selectedYear < todayYear!!) previousOrFuture = true
+        //disable past date for current month
+
+       /* if ((currentCalendar!![Calendar.MONTH] == todayMonth) && (currentCalendar!![Calendar.YEAR] == todayYear)) {
+            if ((todayMonthStartDate-1)>1) {
+                for (i in 1..(todayMonthStartDate - 1)) {
+                    list.add(CalendarDateModel(i.toString(), true, false))
+                }
+            }
+        }*/
+
+        val startDate=1
+        /* var previousOrFuture = false
+         if (selectedYear == todayYear) {
+             if (selectedMonth < todayMonth!!) previousOrFuture = true
+         }
+
+         if (selectedYear < todayYear!!) previousOrFuture = true
+         */
 
         if (CalendarUtils.selectedFrequency == 1) {
 
             when (CalendarUtils.selectedInterval) {
                 11 -> {
-                    setDatesForOnceAMonth(maxdate, previousOrFuture)
+                    setDatesForOnceAMonth(startDate!!, maxdate)
                 }
                 12 -> {
-                    setDatesForTwiceAMonth(maxdate, previousOrFuture)
+                    setDatesForTwiceAMonth(startDate!!, maxdate)
                 }
                 13 -> {
-                    setDatesForEveryTwoMonths(maxdate, previousOrFuture)
+                    setDatesForEveryTwoMonths(startDate!!, maxdate)
                 }
                 14 -> {
-                    setDatesForQuarterly(maxdate, previousOrFuture)
+                    setDatesForQuarterly(startDate!!, maxdate)
                 }
                 15 -> {
-                    setDatesForSixMonths(maxdate, previousOrFuture)
+                    setDatesForSixMonths(startDate!!, maxdate)
                 }
             }
-        }
-
-        else if (CalendarUtils.selectedFrequency==2){
-            when(CalendarUtils.selectedInterval){
+        } else if (CalendarUtils.selectedFrequency == 2) {
+            when (CalendarUtils.selectedInterval) {
                 21 -> {
-                    setDatesForWeekly(maxdate, previousOrFuture)
+                    setDatesForWeekly(startDate!!, maxdate)
                 }
                 22 -> {
-                    setDatesForTwoWeek(maxdate, previousOrFuture)
+                    setDatesForTwoWeek(startDate!!, maxdate)
                 }
             }
-        }
-
-        else{
-            setDatesForYearly(maxdate, previousOrFuture)
+        } else {
+            setDatesForYearly(startDate!!, maxdate)
         }
     }
 
-    private fun setDatesForYearly(maxdate: Int, previousOrFuture: Boolean) {
 
-        if (selectedMonthYear==-1){
-            selectedMonthYear= currentCalendar!![Calendar.MONTH]
-         }
+    private fun setDatesForYearly(startDate: Int, maxdate: Int) {
 
+        if (selectedMonthYearlyFrequency == -1) {
+            selectedMonthYearlyFrequency = currentCalendar!![Calendar.MONTH]
+        }
 
-        val highLightedDate = if (selectedDate > 0) {
-            selectedDate
+        val highLightedDate = if (selectedDateForYearlyFrequency > 0) {
+            selectedDateForYearlyFrequency
         } else {
             defaultSelectedDate!!
         }
 
-        for (i in 1..maxdate) {
-            if (highLightedDate == i &&selectedMonthYear==currentCalendar!![Calendar.MONTH]) {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, true)))
+
+        for (i in startDate..maxdate) {
+            if (i == highLightedDate && selectedMonthYearlyFrequency == currentCalendar!![Calendar.MONTH]) {
+                list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, false)))
+                list.add((CalendarDateModel(i.toString(), false, false)))
             }
         }
     }
 
-    private fun setDatesForWeekly(maxdate: Int, previousOrFuture: Boolean) {
-       val auxWeeklyCalendar= currentCalendar
+    private fun setDatesForWeekly(startDate: Int, maxdate: Int) {
+        val auxWeeklyCalendar = currentCalendar
 
-        for (i in 1..maxdate) {
+        for (i in startDate..maxdate) {
             auxWeeklyCalendar!![Calendar.DAY_OF_MONTH] = i
             val dayOfMonth = auxWeeklyCalendar[Calendar.DAY_OF_WEEK]
-            Log.d("hello",dayOfMonth.toString())
-            if (dayOfMonth==CalendarUtils.selectedday) {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, true)))
-                Log.d("hello validation",dayOfMonth.toString())
-
+            if (dayOfMonth == CalendarUtils.selectedday) {
+                list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, false)))
+                list.add((CalendarDateModel(i.toString(), false, false)))
             }
         }
 
     }
-    private fun setDatesForTwoWeek(maxdate: Int, previousOrFuture: Boolean) {
-        val auxWeeklyCalendar= currentCalendar
-        var showSelecteDate=false
-        for (i in 1..maxdate) {
+
+    private fun setDatesForTwoWeek(startDate: Int, maxdate: Int) {
+        val auxWeeklyCalendar = currentCalendar
+        var showSelecteDate = false
+        for (i in startDate..maxdate) {
             auxWeeklyCalendar!![Calendar.DAY_OF_MONTH] = i
             val dayOfMonth = auxWeeklyCalendar[Calendar.DAY_OF_WEEK]
 
-            if (dayOfMonth==CalendarUtils.selectedday) {
-                Log.d("hello day",dayOfMonth.toString())
-                showSelecteDate=!showSelecteDate
+            if (dayOfMonth == CalendarUtils.selectedday) {
+                showSelecteDate = !showSelecteDate
 
-                Log.d("hello boolean",showSelecteDate.toString()+" "+i.toString())
-
-                if (showSelecteDate){
-                    list.add((CalendarDateModel(i.toString(), previousOrFuture, true)))
-                    Log.d("hello validation",dayOfMonth.toString())
-                }
-                else{
-                    list.add((CalendarDateModel(i.toString(), previousOrFuture, false)))
-
+                if (showSelecteDate) {
+                    list.add((CalendarDateModel(i.toString(), false, true)))
+                } else {
+                    list.add((CalendarDateModel(i.toString(), false, false)))
                 }
 
             } else {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, false)))
+                list.add((CalendarDateModel(i.toString(), false, false)))
             }
         }
     }
 
-    private fun setDatesForTwiceAMonth(maxdate: Int, previousOrFuture: Boolean) {
-        for (i in 1..maxdate) {
-            if (i==firstDate || i==secondDate ) {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, true)))
+    private fun setDatesForTwiceAMonth(startDate: Int, maxdate: Int) {
+        for (i in startDate..maxdate) {
+            if (i == firstDate || i == secondDate) {
+                list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, false)))
+                list.add((CalendarDateModel(i.toString(), false, false)))
             }
         }
     }
 
-    private fun setDatesForSixMonths(maxdate: Int, previousOrFuture: Boolean) {
+    private fun setDatesForSixMonths(startDate: Int, maxdate: Int) {
         val highLightedDate = if (selectedDate > 0) {
             selectedDate
         } else {
             defaultSelectedDate!!
         }
 
-        for (i in 1..maxdate) {
+        for (i in startDate..maxdate) {
             if (highLightedDate == i && monthChanges == monthIntervalGap) {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, true)))
+                list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, false)))
+                list.add((CalendarDateModel(i.toString(), false, false)))
             }
         }
     }
 
-    private fun setDatesForQuarterly(maxdate: Int, previousOrFuture: Boolean) {
+    private fun setDatesForQuarterly(startDate: Int, maxdate: Int) {
         val highLightedDate = if (selectedDate > 0) {
             selectedDate
         } else {
             defaultSelectedDate!!
         }
 
-        for (i in 1..maxdate) {
+        for (i in startDate..maxdate) {
             if (highLightedDate == i && monthChanges == monthIntervalGap) {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, true)))
+                list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, false)))
+                list.add((CalendarDateModel(i.toString(), false, false)))
             }
         }
     }
 
-    private fun setDatesForEveryTwoMonths(maxdate: Int, previousOrFuture: Boolean) {
+    private fun setDatesForEveryTwoMonths(startDate: Int, maxdate: Int) {
         val highLightedDate = if (selectedDate > 0) {
             selectedDate
         } else {
             defaultSelectedDate!!
         }
 
-        for (i in 1..maxdate) {
+        for (i in startDate..maxdate) {
             if (highLightedDate == i && monthChanges == monthIntervalGap) {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, true)))
+                list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, false)))
+                list.add((CalendarDateModel(i.toString(), false, false)))
             }
         }
     }
 
-    private fun setDatesForOnceAMonth(maxdate: Int, previousOrFuture: Boolean) {
+    private fun setDatesForOnceAMonth(startDate: Int, maxdate: Int) {
         val highLightedDate = if (selectedDate > 0) {
             selectedDate
         } else {
             defaultSelectedDate!!
         }
-
-        for (i in 1..maxdate) {
+        for (i in startDate..maxdate) {
             if (highLightedDate == i) {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, true)))
+                list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
-                list.add((CalendarDateModel(i.toString(), previousOrFuture, false)))
+                list.add((CalendarDateModel(i.toString(), false, false)))
             }
         }
     }

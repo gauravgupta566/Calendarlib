@@ -14,10 +14,10 @@ import kotlinx.android.synthetic.main.item_days.view.*
 class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>() {
 
     private var list = mutableListOf<CalendarDateModel>()
-    private var selectedTv: TextView?=null
-    private var calendarListener:CalendarListener?=null
-    private var firstDateTv:TextView?=null
-    private var secondDateTv:TextView?=null
+    private var selectedTv: TextView? = null
+    private var calendarListener: CalendarListener? = null
+    private var firstDateTv: TextView? = null
+    private var secondDateTv: TextView? = null
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CalendarViewHolder {
@@ -27,67 +27,78 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
 
         return CalendarViewHolder(view).apply {
             itemView.dayTv.setOnClickListener {
-                setClick(itemView.dayTv,parent.context)
+                setClick(itemView.dayTv, parent.context)
             }
         }
 
     }
 
     private fun setClick(dayTv: TextView?, context: Context) {
-        if (CalendarUtils.selectedFrequency==CalendarUtils.monthlyFrequencyId){
-            if (CalendarUtils.selectedInterval==CalendarUtils.twiceAMonth){
-                setItemForTwiceAMonth(dayTv,context)
+        if (CalendarUtils.selectedFrequency == CalendarUtils.monthlyFrequencyId) {
+            if (CalendarUtils.selectedInterval == CalendarUtils.twiceAMonth) {
+                setItemForTwiceAMonth(dayTv, context)
+            } else {
+                setItemForMonthly(dayTv, context)
             }
-            else {
-                setItemForMonthly(dayTv,context)
-            }
+        } else if (CalendarUtils.selectedFrequency == CalendarUtils.weeklyFrequencyId) {
+            var a = 100
+        } else {
+            setItemForYearly(dayTv, context)
         }
+
+    }
+
+    private fun setItemForYearly(dayTv: TextView?, context: Context) {
+        if (selectedTv != null) {
+            deSelectPreviousDay(selectedTv, context)
+            selectedTv = dayTv
+        } else {
+            selectedTv = dayTv
+        }
+        dayTv?.setTextColor(ContextCompat.getColor(context, R.color.white))
+        dayTv?.setBackgroundResource(R.drawable.bg_date_selected_bill_qube)
+        updateDates(dayTv?.text.toString().toInt())
     }
 
     private fun setItemForTwiceAMonth(dayTv: TextView?, context: Context) {
 
-        val selectedDay=dayTv?.text.toString().toInt()
+        val selectedDay = dayTv?.text.toString().toInt()
         //disable previous dates
-        if (selectedTv!=null){
-            deSelectPreviousDay(selectedTv,context)
+        if (selectedTv != null) {
+            deSelectPreviousDay(selectedTv, context)
         }
-        selectedTv=null
+        selectedTv = null
 
-        if (firstDateTv==null){
-            firstDateTv=dayTv
-        }
-        else if (firstDateTv!=null && secondDateTv==null){
-          val  previousSelectedDate=firstDateTv?.text.toString().toInt()
+        if (firstDateTv == null) {
+            firstDateTv = dayTv
+        } else if (firstDateTv != null && secondDateTv == null) {
+            val previousSelectedDate = firstDateTv?.text.toString().toInt()
 
-            if (selectedDay>previousSelectedDate){
-                secondDateTv=dayTv
-            }
-            else{
-                deSelectPreviousDay(firstDateTv,context)
-                firstDateTv=dayTv
-
-             }
-        }
-        else if (firstDateTv!=null && secondDateTv!=null){
-            val  previousFirstSelectedDate=firstDateTv?.text.toString().toInt()
-            val  previousSecondSelectedDate=secondDateTv?.text.toString().toInt()
-
-            if (selectedDay>previousFirstSelectedDate && selectedDay<previousSecondSelectedDate){
-                deSelectPreviousDay(firstDateTv,context)
-                firstDateTv=dayTv
-            }
-            else if (selectedDay<previousFirstSelectedDate){
-                deSelectPreviousDay(firstDateTv,context)
-                firstDateTv=dayTv
+            if (selectedDay > previousSelectedDate) {
+                secondDateTv = dayTv
+            } else {
+                deSelectPreviousDay(firstDateTv, context)
+                firstDateTv = dayTv
 
             }
-            else if (selectedDay>previousSecondSelectedDate){
-                deSelectPreviousDay(secondDateTv,context)
-                secondDateTv=dayTv
+        } else if (firstDateTv != null && secondDateTv != null) {
+            val previousFirstSelectedDate = firstDateTv?.text.toString().toInt()
+            val previousSecondSelectedDate = secondDateTv?.text.toString().toInt()
+
+            if (selectedDay > previousFirstSelectedDate && selectedDay < previousSecondSelectedDate) {
+                deSelectPreviousDay(firstDateTv, context)
+                firstDateTv = dayTv
+            } else if (selectedDay < previousFirstSelectedDate) {
+                deSelectPreviousDay(firstDateTv, context)
+                firstDateTv = dayTv
+
+            } else if (selectedDay > previousSecondSelectedDate) {
+                deSelectPreviousDay(secondDateTv, context)
+                secondDateTv = dayTv
             }
         }
 
-        dayTv?.setTextColor(ContextCompat.getColor(context,R.color.white))
+        dayTv?.setTextColor(ContextCompat.getColor(context, R.color.white))
         dayTv?.setBackgroundResource(R.drawable.bg_date_selected_bill_qube)
         updateDates(dayTv?.text.toString().toInt())
 
@@ -97,52 +108,50 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
         dateTv: TextView?,
         context: Context
     ) {
-        dateTv?.setTextColor(ContextCompat.getColor(context,R.color.gray3A))
+        dateTv?.setTextColor(ContextCompat.getColor(context, R.color.gray3A))
         dateTv?.setBackgroundResource(0)
     }
 
     private fun setItemForMonthly(dayTv: TextView?, context: Context) {
-        if (selectedTv!=null){
-            selectedTv?.setTextColor(ContextCompat.getColor(context,R.color.gray3A))
+        if (selectedTv != null) {
+            selectedTv?.setTextColor(ContextCompat.getColor(context, R.color.gray3A))
             selectedTv?.setBackgroundResource(0)
-            dayTv?.setTextColor(ContextCompat.getColor(context,R.color.white))
-            selectedTv=dayTv
-        }
-        else{
-            dayTv?.setTextColor(ContextCompat.getColor(context,R.color.white))
-            selectedTv=dayTv
+            dayTv?.setTextColor(ContextCompat.getColor(context, R.color.white))
+            selectedTv = dayTv
+        } else {
+            dayTv?.setTextColor(ContextCompat.getColor(context, R.color.white))
+            selectedTv = dayTv
         }
         dayTv?.setBackgroundResource(R.drawable.bg_date_selected_bill_qube)
         updateDates(dayTv?.text.toString().toInt())
     }
 
     private fun updateDates(date: Int) {
-        if (CalendarUtils.selectedFrequency==1){
+        if (CalendarUtils.selectedFrequency == CalendarUtils.monthlyFrequencyId) {
 
-            if (CalendarUtils.selectedInterval==11){
+            if (CalendarUtils.selectedInterval == 11) {
                 calendarListener?.onceMonthSelected(date)
-            }
-            else if (CalendarUtils.selectedInterval==12){
-                if (firstDateTv!=null && secondDateTv!=null){
-                    calendarListener?.twiceDateSelected(firstDateTv?.text.toString().toInt(),secondDateTv?.text.toString().toInt())
+            } else if (CalendarUtils.selectedInterval == 12) {
+                if (firstDateTv != null && secondDateTv != null) {
+                    calendarListener?.twiceDateSelected(
+                        firstDateTv?.text.toString().toInt(),
+                        secondDateTv?.text.toString().toInt()
+                    )
+                } else if (firstDateTv != null && secondDateTv == null) {
+                    calendarListener?.twiceDateSelected(firstDateTv?.text.toString().toInt(), 0)
                 }
-                else if (firstDateTv!=null &&secondDateTv==null){
-                    calendarListener?.twiceDateSelected(firstDateTv?.text.toString().toInt(),0)
-                }
-            }
-
-            else if (CalendarUtils.selectedInterval==13){
+            } else if (CalendarUtils.selectedInterval == 13) {
                 calendarListener?.everyTwoMonthSelected(date)
-            }
-
-            else if (CalendarUtils.selectedInterval==14){
+            } else if (CalendarUtils.selectedInterval == 14) {
                 calendarListener?.quarterlySelected(date)
-            }
-
-            else if (CalendarUtils.selectedInterval==15){
+            } else if (CalendarUtils.selectedInterval == 15) {
                 calendarListener?.sixMonthSelected(date)
             }
-        }
+        } else if (CalendarUtils.selectedFrequency == CalendarUtils.weeklyFrequencyId) {
+            var a = 11
+        } else {
+            calendarListener?.yearlySelected(date)
+          }
 
     }
 
@@ -151,24 +160,38 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
     }
 
     override fun onBindViewHolder(holder: CalendarViewHolder, position: Int) {
-        val model= list[position]
+        val model = list[position]
 
-        holder.itemView.dayTv.text=model.date
-        if (model.previousOrFuture){
-            holder.itemView.dayTv.setTextColor(ContextCompat.getColor(holder.itemView.context,R.color.grayC7))
-            holder.itemView.dayTv.isClickable=false
-        }
-        else{
-            if (model.selectedDate){
+        holder.itemView.dayTv.text = model.date
+        if (model.previousOrFuture) {
+            holder.itemView.dayTv.setTextColor(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.grayC7
+                )
+            )
+            holder.itemView.dayTv.isClickable = false
+            holder.itemView.dayTv.setBackgroundResource(0)
+        } else {
+            if (model.selectedDate) {
                 holder.itemView.dayTv.setBackgroundResource(R.drawable.bg_date_selected_bill_qube)
-                holder.itemView.dayTv.setTextColor(ContextCompat.getColor(holder.itemView.context,R.color.white))
-                selectedTv=holder.itemView.dayTv
-            }
-            else{
+                holder.itemView.dayTv.setTextColor(
+                    ContextCompat.getColor(
+                        holder.itemView.context,
+                        R.color.white
+                    )
+                )
+                selectedTv = holder.itemView.dayTv
+            } else {
                 holder.itemView.dayTv.setBackgroundResource(0)
-                holder.itemView.dayTv.setTextColor(ContextCompat.getColor(holder.itemView.context,R.color.gray3A))
+                holder.itemView.dayTv.setTextColor(
+                    ContextCompat.getColor(
+                        holder.itemView.context,
+                        R.color.gray3A
+                    )
+                )
             }
-            holder.itemView.dayTv.isClickable=true
+            holder.itemView.dayTv.isClickable = true
         }
     }
 
@@ -178,20 +201,23 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
         notifyDataSetChanged()
     }
 
-    class CalendarViewHolder(itemView: View):RecyclerView.ViewHolder(itemView)
+    class CalendarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
 
-    fun setCalendarListener(calendarListener: CalendarListener){
-        this.calendarListener=calendarListener
+    fun setCalendarListener(calendarListener: CalendarListener) {
+        this.calendarListener = calendarListener
 
     }
-    interface CalendarListener{
-        fun onceMonthSelected(date:Int)
-        fun twiceDateSelected(firstdate:Int,secondDate:Int)
-        fun everyTwoMonthSelected(date:Int)
-        fun quarterlySelected(date:Int)
-        fun sixMonthSelected(date:Int)
 
-        fun yearlySelected(date:Int,month:Int)
+    interface CalendarListener {
+        //monthly
+        fun onceMonthSelected(date: Int)
+        fun twiceDateSelected(firstdate: Int, secondDate: Int)
+        fun everyTwoMonthSelected(date: Int)
+        fun quarterlySelected(date: Int)
+        fun sixMonthSelected(date: Int)
+
+        //yearly
+        fun yearlySelected(date: Int)
     }
 }

@@ -29,7 +29,7 @@ class CalendarUtils {
 
         var selectedFrequency = 2
         var selectedInterval = 22
-        var selectedday = 5
+        var selectedday = 2
 
 
     }
