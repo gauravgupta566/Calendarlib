@@ -1,2 +1,3 @@
+include ':gauravlib'
 include ':app'
 rootProject.name = "CalendarProject"
