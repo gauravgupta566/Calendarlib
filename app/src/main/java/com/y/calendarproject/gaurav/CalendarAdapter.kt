@@ -41,10 +41,26 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
                 setItemForMonthly(dayTv, context)
             }
         } else if (CalendarUtils.selectedFrequency == CalendarUtils.weeklyFrequencyId) {
+
+           if(dayTv?.background!=null){
+
+              setItemForWeekly(dayTv, context)
+
+           }
+           else {
+
+           }
             var a = 100
+
         } else {
             setItemForYearly(dayTv, context)
         }
+
+    }
+
+    private fun setItemForWeekly(dayTv: TextView, context: Context) {
+        deSelectPreviousDay(dayTv,context)
+        updateDates(dayTv.text.toString().toInt())
 
     }
 
@@ -148,7 +164,14 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
                 calendarListener?.sixMonthSelected(date)
             }
         } else if (CalendarUtils.selectedFrequency == CalendarUtils.weeklyFrequencyId) {
-            var a = 11
+
+            if (CalendarUtils.selectedInterval==CalendarUtils.oneWeek){
+                calendarListener?.everyWeekSelected(date)
+            }
+            else {
+               calendarListener?.twoWeekSelected(date)
+            }
+
         } else {
             calendarListener?.yearlySelected(date)
           }
@@ -216,6 +239,10 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
         fun everyTwoMonthSelected(date: Int)
         fun quarterlySelected(date: Int)
         fun sixMonthSelected(date: Int)
+
+        // weekly
+        fun everyWeekSelected(date: Int)
+        fun twoWeekSelected(date: Int)
 
         //yearly
         fun yearlySelected(date: Int)

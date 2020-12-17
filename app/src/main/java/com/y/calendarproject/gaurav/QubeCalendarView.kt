@@ -24,13 +24,16 @@ class QubeCalendarView @JvmOverloads constructor(
     private var todayDate: Date? = null
     private var todayYear: Int? = null
     private var todayMonth: Int? = null
-    private var todayMonthStartDate=0
+    private var todayMonthStartDate = 0
 
     private var defaultSelectedDate: Int? = null
 
 
     private var calendarAdapter = CalendarAdapter()
-    private var selectedDate = 0
+    private var selectedDateForMonthlyFrequency = 0
+    private var selectedMonthForMonthlyFrequency = -1
+    private var selectedYearForMonthlyFrequency = 0
+
     private var monthChanges = 0
     private var monthIntervalGap = 0
 
@@ -38,50 +41,82 @@ class QubeCalendarView @JvmOverloads constructor(
     private var secondDate = 0
 
     private var selectedDateForYearlyFrequency = 0
-    private var selectedMonthYearlyFrequency = -1
+    private var selectedMonthForYearlyFrequency = -1
+    private var selectedYearForYearlyFrequency = -1
+
+
+    private var weeklySelectedMonth = -1
+    private var weeklySelectedDate = 0
+    private var weeklySelectedYear = 0
 
 
     private val listener by lazy {
 
         object : CalendarAdapter.CalendarListener {
             override fun onceMonthSelected(date: Int) {
-                selectedDate = date
+                selectedDateForMonthlyFrequency = date
+                selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
+                selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
                 updateView()
-                Log.d("hello", "updateviews called")
             }
 
             override fun twiceDateSelected(firstDay: Int, secondDay: Int) {
-                Log.d("hello overide", CalendarUtils.selectedInterval.toString())
-
                 firstDate = firstDay
                 secondDate = secondDay
+                selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
+                selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
+
                 updateView()
             }
 
             override fun everyTwoMonthSelected(date: Int) {
                 monthIntervalGap = 2
                 monthChanges = 2
-                selectedDate = date
+                selectedDateForMonthlyFrequency = date
+                selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
+                selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
+
                 updateView()
             }
 
             override fun quarterlySelected(date: Int) {
                 monthIntervalGap = 4
                 monthChanges = 4
-                selectedDate = date
+                selectedDateForMonthlyFrequency = date
+                selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
+                selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
+
                 updateView()
             }
 
             override fun sixMonthSelected(date: Int) {
                 monthIntervalGap = 6
                 monthChanges = 6
-                selectedDate = date
+                selectedDateForMonthlyFrequency = date
+                selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
+                selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
+                updateView()
+            }
+
+            override fun everyWeekSelected(date: Int) {
+                weeklySelectedMonth = currentCalendar!![Calendar.MONTH]
+                weeklySelectedDate = date
+                weeklySelectedYear = currentCalendar!![Calendar.YEAR]
+                updateView()
+            }
+
+            override fun twoWeekSelected(date: Int) {
+                weeklySelectedMonth = currentCalendar!![Calendar.MONTH]
+                weeklySelectedDate = date
+                weeklySelectedYear = currentCalendar!![Calendar.YEAR]
                 updateView()
             }
 
             override fun yearlySelected(date: Int) {
                 selectedDateForYearlyFrequency = date
-                selectedMonthYearlyFrequency = currentCalendar!![Calendar.MONTH]
+                selectedMonthForYearlyFrequency = currentCalendar!![Calendar.MONTH]
+                selectedYearForYearlyFrequency = currentCalendar!![Calendar.YEAR]
+
                 updateView()
             }
         }
@@ -138,9 +173,6 @@ class QubeCalendarView @JvmOverloads constructor(
 
     private fun changeCalendarMonth(i: Int) {
         currentCalendar?.add(Calendar.MONTH, i)
-      val month=  currentCalendar?.get(Calendar.MONTH)
-
-        Log.d("hello",month.toString())
         updateView()
     }
 
@@ -151,9 +183,9 @@ class QubeCalendarView @JvmOverloads constructor(
             Calendar.getInstance(Locale.getDefault())
         auxCalendar.time = currentCalendar?.time
 
-        if (todayMonthStartDate==0){
-            todayMonthStartDate=auxCalendar[Calendar.DAY_OF_MONTH]
-       }
+        if (todayMonthStartDate == 0) {
+            todayMonthStartDate = auxCalendar[Calendar.DAY_OF_MONTH]
+        }
 
         auxCalendar[Calendar.DAY_OF_MONTH] = 1
 
@@ -215,17 +247,18 @@ class QubeCalendarView @JvmOverloads constructor(
         maxdate: Int
     ) {
 
-        //disable past date for current month
+        var startDate = 1
 
-       /* if ((currentCalendar!![Calendar.MONTH] == todayMonth) && (currentCalendar!![Calendar.YEAR] == todayYear)) {
-            if ((todayMonthStartDate-1)>1) {
+        //disable past date for current month
+        if ((currentCalendar!![Calendar.MONTH] == todayMonth) && (currentCalendar!![Calendar.YEAR] == todayYear)) {
+            if ((todayMonthStartDate - 1) > 1) {
                 for (i in 1..(todayMonthStartDate - 1)) {
                     list.add(CalendarDateModel(i.toString(), true, false))
                 }
+                startDate = todayMonthStartDate
             }
-        }*/
+        }
 
-        val startDate=1
         /* var previousOrFuture = false
          if (selectedYear == todayYear) {
              if (selectedMonth < todayMonth!!) previousOrFuture = true
@@ -238,40 +271,40 @@ class QubeCalendarView @JvmOverloads constructor(
 
             when (CalendarUtils.selectedInterval) {
                 11 -> {
-                    setDatesForOnceAMonth(startDate!!, maxdate)
+                    setDatesForOnceAMonth(startDate, maxdate)
                 }
                 12 -> {
-                    setDatesForTwiceAMonth(startDate!!, maxdate)
+                    setDatesForTwiceAMonth(startDate, maxdate)
                 }
                 13 -> {
-                    setDatesForEveryTwoMonths(startDate!!, maxdate)
+                    setDatesForEveryTwoMonths(startDate, maxdate)
                 }
                 14 -> {
-                    setDatesForQuarterly(startDate!!, maxdate)
+                    setDatesForQuarterly(startDate, maxdate)
                 }
                 15 -> {
-                    setDatesForSixMonths(startDate!!, maxdate)
+                    setDatesForSixMonths(startDate, maxdate)
                 }
             }
         } else if (CalendarUtils.selectedFrequency == 2) {
             when (CalendarUtils.selectedInterval) {
                 21 -> {
-                    setDatesForWeekly(startDate!!, maxdate)
+                    setDatesForWeekly(startDate, maxdate)
                 }
                 22 -> {
-                    setDatesForTwoWeek(startDate!!, maxdate)
+                    setDatesForTwoWeek(startDate, maxdate)
                 }
             }
         } else {
-            setDatesForYearly(startDate!!, maxdate)
+            setDatesForYearly(startDate, maxdate)
         }
     }
 
 
     private fun setDatesForYearly(startDate: Int, maxdate: Int) {
-
-        if (selectedMonthYearlyFrequency == -1) {
-            selectedMonthYearlyFrequency = currentCalendar!![Calendar.MONTH]
+        if (selectedMonthForYearlyFrequency == -1) {
+            selectedMonthForYearlyFrequency = currentCalendar!![Calendar.MONTH]
+            selectedYearForYearlyFrequency = currentCalendar!![Calendar.YEAR]
         }
 
         val highLightedDate = if (selectedDateForYearlyFrequency > 0) {
@@ -280,9 +313,10 @@ class QubeCalendarView @JvmOverloads constructor(
             defaultSelectedDate!!
         }
 
-
         for (i in startDate..maxdate) {
-            if (i == highLightedDate && selectedMonthYearlyFrequency == currentCalendar!![Calendar.MONTH]) {
+            if ((i == highLightedDate) && (selectedMonthForYearlyFrequency == currentCalendar!![Calendar.MONTH])
+                && (currentCalendar!![Calendar.YEAR] >= selectedYearForYearlyFrequency)
+            ) {
                 list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
                 list.add((CalendarDateModel(i.toString(), false, false)))
@@ -296,10 +330,37 @@ class QubeCalendarView @JvmOverloads constructor(
         for (i in startDate..maxdate) {
             auxWeeklyCalendar!![Calendar.DAY_OF_MONTH] = i
             val dayOfMonth = auxWeeklyCalendar[Calendar.DAY_OF_WEEK]
-            if (dayOfMonth == CalendarUtils.selectedday) {
-                list.add((CalendarDateModel(i.toString(), false, true)))
+
+            if (weeklySelectedDate != 0) {
+                if ((dayOfMonth == CalendarUtils.selectedDay) &&
+                    (auxWeeklyCalendar[Calendar.MONTH] >= weeklySelectedMonth) && (auxWeeklyCalendar[Calendar.YEAR] >= weeklySelectedYear)
+                ) {
+                    if ((auxWeeklyCalendar[Calendar.MONTH] == weeklySelectedMonth) &&
+                        (auxWeeklyCalendar[Calendar.YEAR] == weeklySelectedYear)
+                    ) {
+
+                        if (i > weeklySelectedDate) {
+                            list.add((CalendarDateModel(i.toString(), false, true)))
+                        } else {
+                            list.add((CalendarDateModel(i.toString(), false, false)))
+
+                        }
+
+                    } else {
+                        list.add((CalendarDateModel(i.toString(), false, true)))
+                    }
+
+
+                } else {
+                    list.add((CalendarDateModel(i.toString(), false, false)))
+                }
+
             } else {
-                list.add((CalendarDateModel(i.toString(), false, false)))
+                if (dayOfMonth == CalendarUtils.selectedDay) {
+                    list.add((CalendarDateModel(i.toString(), false, true)))
+                } else {
+                    list.add((CalendarDateModel(i.toString(), false, false)))
+                }
             }
         }
 
@@ -307,29 +368,69 @@ class QubeCalendarView @JvmOverloads constructor(
 
     private fun setDatesForTwoWeek(startDate: Int, maxdate: Int) {
         val auxWeeklyCalendar = currentCalendar
-        var showSelecteDate = false
+        var showSelectedDate = false
         for (i in startDate..maxdate) {
             auxWeeklyCalendar!![Calendar.DAY_OF_MONTH] = i
             val dayOfMonth = auxWeeklyCalendar[Calendar.DAY_OF_WEEK]
 
-            if (dayOfMonth == CalendarUtils.selectedday) {
-                showSelecteDate = !showSelecteDate
+            if (weeklySelectedDate != 0) {
 
-                if (showSelecteDate) {
-                    list.add((CalendarDateModel(i.toString(), false, true)))
+                if ((dayOfMonth == CalendarUtils.selectedDay) &&
+                    (auxWeeklyCalendar[Calendar.MONTH] >= weeklySelectedMonth) && (auxWeeklyCalendar[Calendar.YEAR] >= weeklySelectedYear)
+                ) {
+                    if ((auxWeeklyCalendar[Calendar.MONTH] == weeklySelectedMonth) && (auxWeeklyCalendar[Calendar.YEAR] == weeklySelectedYear)) {
+
+                        if (i > weeklySelectedDate) {
+                            showSelectedDate = !showSelectedDate
+
+                            if (showSelectedDate) {
+                                list.add((CalendarDateModel(i.toString(), false, true)))
+                            } else {
+                                list.add((CalendarDateModel(i.toString(), false, false)))
+                            }
+                        } else {
+                            list.add((CalendarDateModel(i.toString(), false, false)))
+                        }
+                    } else {
+                        showSelectedDate = !showSelectedDate
+
+                        if (showSelectedDate) {
+                            list.add((CalendarDateModel(i.toString(), false, true)))
+                        } else {
+                            list.add((CalendarDateModel(i.toString(), false, false)))
+                        }
+                    }
                 } else {
                     list.add((CalendarDateModel(i.toString(), false, false)))
                 }
-
             } else {
-                list.add((CalendarDateModel(i.toString(), false, false)))
+                if ((dayOfMonth == CalendarUtils.selectedDay)) {
+                    showSelectedDate = !showSelectedDate
+
+                    if (showSelectedDate) {
+                        list.add((CalendarDateModel(i.toString(), false, true)))
+                    } else {
+                        list.add((CalendarDateModel(i.toString(), false, false)))
+                    }
+
+                } else {
+                    list.add((CalendarDateModel(i.toString(), false, false)))
+                }
             }
         }
     }
 
     private fun setDatesForTwiceAMonth(startDate: Int, maxdate: Int) {
+
+        if (selectedYearForMonthlyFrequency == 0) {
+            selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
+        }
+
+        if (selectedMonthForMonthlyFrequency == -1) {
+            selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
+        }
         for (i in startDate..maxdate) {
-            if (i == firstDate || i == secondDate) {
+            if ((i == firstDate) || (i == secondDate) && (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency)) {
                 list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
                 list.add((CalendarDateModel(i.toString(), false, false)))
@@ -338,14 +439,22 @@ class QubeCalendarView @JvmOverloads constructor(
     }
 
     private fun setDatesForSixMonths(startDate: Int, maxdate: Int) {
-        val highLightedDate = if (selectedDate > 0) {
-            selectedDate
+        val highLightedDate = if (selectedDateForMonthlyFrequency > 0) {
+            selectedDateForMonthlyFrequency
+
         } else {
             defaultSelectedDate!!
         }
+        if (selectedYearForMonthlyFrequency == 0) {
+            selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
+        }
+
+        if (selectedMonthForMonthlyFrequency == -1) {
+            selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
+        }
 
         for (i in startDate..maxdate) {
-            if (highLightedDate == i && monthChanges == monthIntervalGap) {
+            if ((highLightedDate == i && monthChanges == monthIntervalGap) && (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency)) {
                 list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
                 list.add((CalendarDateModel(i.toString(), false, false)))
@@ -354,14 +463,22 @@ class QubeCalendarView @JvmOverloads constructor(
     }
 
     private fun setDatesForQuarterly(startDate: Int, maxdate: Int) {
-        val highLightedDate = if (selectedDate > 0) {
-            selectedDate
+        val highLightedDate = if (selectedDateForMonthlyFrequency > 0) {
+            selectedDateForMonthlyFrequency
         } else {
             defaultSelectedDate!!
         }
 
+        if (selectedYearForMonthlyFrequency == 0) {
+            selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
+        }
+
+        if (selectedMonthForMonthlyFrequency == -1) {
+            selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
+        }
+
         for (i in startDate..maxdate) {
-            if (highLightedDate == i && monthChanges == monthIntervalGap) {
+            if ((highLightedDate == i) && (monthChanges == monthIntervalGap) && (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency)) {
                 list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
                 list.add((CalendarDateModel(i.toString(), false, false)))
@@ -370,14 +487,22 @@ class QubeCalendarView @JvmOverloads constructor(
     }
 
     private fun setDatesForEveryTwoMonths(startDate: Int, maxdate: Int) {
-        val highLightedDate = if (selectedDate > 0) {
-            selectedDate
+        val highLightedDate = if (selectedDateForMonthlyFrequency > 0) {
+            selectedDateForMonthlyFrequency
         } else {
             defaultSelectedDate!!
         }
 
+        if (selectedYearForMonthlyFrequency == 0) {
+            selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
+        }
+
+        if (selectedMonthForMonthlyFrequency == -1) {
+            selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
+        }
+
         for (i in startDate..maxdate) {
-            if (highLightedDate == i && monthChanges == monthIntervalGap) {
+            if ((highLightedDate == i) && (monthChanges == monthIntervalGap) && (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency)) {
                 list.add((CalendarDateModel(i.toString(), false, true)))
             } else {
                 list.add((CalendarDateModel(i.toString(), false, false)))
@@ -386,14 +511,30 @@ class QubeCalendarView @JvmOverloads constructor(
     }
 
     private fun setDatesForOnceAMonth(startDate: Int, maxdate: Int) {
-        val highLightedDate = if (selectedDate > 0) {
-            selectedDate
+        val highLightedDate = if (selectedDateForMonthlyFrequency > 0) {
+            selectedDateForMonthlyFrequency
         } else {
             defaultSelectedDate!!
         }
+
+        if (selectedYearForMonthlyFrequency == 0) {
+            selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
+        }
+        if (selectedMonthForMonthlyFrequency == -1) {
+            selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
+        }
         for (i in startDate..maxdate) {
-            if (highLightedDate == i) {
-                list.add((CalendarDateModel(i.toString(), false, true)))
+            if ((highLightedDate == i) && (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency)) {
+                if ((currentCalendar!![Calendar.YEAR] == selectedYearForMonthlyFrequency)&&
+                    ((currentCalendar!![Calendar.MONTH] >= selectedMonthForMonthlyFrequency))){
+                    list.add((CalendarDateModel(i.toString(), false, true)))
+                }
+                else if (currentCalendar!![Calendar.YEAR] > selectedYearForMonthlyFrequency){
+                    list.add((CalendarDateModel(i.toString(), false, true)))
+                }
+                else{
+                    list.add((CalendarDateModel(i.toString(), false, false)))
+                }
             } else {
                 list.add((CalendarDateModel(i.toString(), false, false)))
             }
