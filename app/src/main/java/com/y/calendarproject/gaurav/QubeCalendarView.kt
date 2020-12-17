@@ -2,7 +2,6 @@ package com.y.calendarproject.gaurav
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
@@ -525,14 +524,13 @@ class QubeCalendarView @JvmOverloads constructor(
         }
         for (i in startDate..maxdate) {
             if ((highLightedDate == i) && (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency)) {
-                if ((currentCalendar!![Calendar.YEAR] == selectedYearForMonthlyFrequency)&&
-                    ((currentCalendar!![Calendar.MONTH] >= selectedMonthForMonthlyFrequency))){
+                if ((currentCalendar!![Calendar.YEAR] == selectedYearForMonthlyFrequency) &&
+                    ((currentCalendar!![Calendar.MONTH] >= selectedMonthForMonthlyFrequency))
+                ) {
                     list.add((CalendarDateModel(i.toString(), false, true)))
-                }
-                else if (currentCalendar!![Calendar.YEAR] > selectedYearForMonthlyFrequency){
+                } else if (currentCalendar!![Calendar.YEAR] > selectedYearForMonthlyFrequency) {
                     list.add((CalendarDateModel(i.toString(), false, true)))
-                }
-                else{
+                } else {
                     list.add((CalendarDateModel(i.toString(), false, false)))
                 }
             } else {
