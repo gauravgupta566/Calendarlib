@@ -54,8 +54,12 @@ class QubeCalendarView @JvmOverloads constructor(
         object : CalendarAdapter.CalendarListener {
             override fun onceMonthSelected(date: Int) {
                 selectedDateForMonthlyFrequency = date
-                selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
-                selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
+
+                var aaaa=1000
+                var b=2000
+
+               // selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
+                //selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
                 updateView()
             }
 
