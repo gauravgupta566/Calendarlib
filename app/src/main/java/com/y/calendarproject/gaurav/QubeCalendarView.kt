@@ -2,7 +2,6 @@ package com.y.calendarproject.gaurav
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
@@ -259,7 +258,13 @@ class QubeCalendarView @JvmOverloads constructor(
             }
         }
 
+        /* var previousOrFuture = false
+         if (selectedYear == todayYear) {
+             if (selectedMonth < todayMonth!!) previousOrFuture = true
+         }
 
+         if (selectedYear < todayYear!!) previousOrFuture = true
+         */
 
         if (CalendarUtils.selectedFrequency == 1) {
 
