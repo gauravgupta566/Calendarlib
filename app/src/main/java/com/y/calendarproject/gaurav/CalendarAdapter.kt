@@ -18,6 +18,7 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
     private var calendarListener: CalendarListener? = null
     private var firstDateTv: TextView? = null
     private var secondDateTv: TextView? = null
+    private var cyclicTurn=""
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CalendarViewHolder {
@@ -77,8 +78,6 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
     }
 
     private fun setItemForTwiceAMonth(dayTv: TextView?, context: Context) {
-
-        val selectedDay = dayTv?.text.toString().toInt()
         //disable previous dates
         if (selectedTv != null) {
             deSelectPreviousDay(selectedTv, context)
@@ -88,29 +87,22 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
         if (firstDateTv == null) {
             firstDateTv = dayTv
         } else if (firstDateTv != null && secondDateTv == null) {
-            val previousSelectedDate = firstDateTv?.text.toString().toInt()
-
-            if (selectedDay > previousSelectedDate) {
-                secondDateTv = dayTv
-            } else {
-                deSelectPreviousDay(firstDateTv, context)
-                firstDateTv = dayTv
-
-            }
+            secondDateTv = dayTv
+            cyclicTurn="first"
         } else if (firstDateTv != null && secondDateTv != null) {
-            val previousFirstSelectedDate = firstDateTv?.text.toString().toInt()
-            val previousSecondSelectedDate = secondDateTv?.text.toString().toInt()
 
-            if (selectedDay > previousFirstSelectedDate && selectedDay < previousSecondSelectedDate) {
-                deSelectPreviousDay(firstDateTv, context)
-                firstDateTv = dayTv
-            } else if (selectedDay < previousFirstSelectedDate) {
+            if (cyclicTurn=="first"){
+                //change firstDateTv
                 deSelectPreviousDay(firstDateTv, context)
                 firstDateTv = dayTv
 
-            } else if (selectedDay > previousSecondSelectedDate) {
+                cyclicTurn="second"
+            }
+            else{
+                //change secondDateTv
                 deSelectPreviousDay(secondDateTv, context)
                 secondDateTv = dayTv
+                cyclicTurn="first"
             }
         }
 
@@ -154,7 +146,8 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
                         secondDateTv?.text.toString().toInt()
                     )
                 } else if (firstDateTv != null && secondDateTv == null) {
-                    calendarListener?.twiceDateSelected(firstDateTv?.text.toString().toInt(), 0)
+                    //here we need to set error message for 2nd date
+                   // calendarListener?.twiceDateSelected(firstDateTv?.text.toString().toInt(), 0)
                 }
             } else if (CalendarUtils.selectedInterval == 13) {
                 calendarListener?.everyTwoMonthSelected(date)
@@ -164,14 +157,12 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
                 calendarListener?.sixMonthSelected(date)
             }
         } else if (CalendarUtils.selectedFrequency == CalendarUtils.weeklyFrequencyId) {
-
             if (CalendarUtils.selectedInterval==CalendarUtils.oneWeek){
                 calendarListener?.everyWeekSelected(date)
             }
             else {
                calendarListener?.twoWeekSelected(date)
             }
-
         } else {
             calendarListener?.yearlySelected(date)
           }
@@ -221,6 +212,7 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
     fun populateDates(populateList: MutableList<CalendarDateModel>) {
         list.clear()
         list.addAll(populateList)
+
         notifyDataSetChanged()
     }
 
@@ -229,7 +221,6 @@ class CalendarAdapter : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>
 
     fun setCalendarListener(calendarListener: CalendarListener) {
         this.calendarListener = calendarListener
-
     }
 
     interface CalendarListener {
