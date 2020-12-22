@@ -28,7 +28,7 @@ class CalendarUtils {
         val saturday = 7
 
         var selectedFrequency = 1
-        var selectedInterval = 15
+        var selectedInterval = 12
         var selectedDay = 2
 
 
