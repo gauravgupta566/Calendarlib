@@ -2,6 +2,7 @@ package com.y.calendarproject.gaurav
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
@@ -139,8 +140,6 @@ class QubeCalendarView @JvmOverloads constructor(
         defaultSelectedDate = todayCalendar?.get(Calendar.DATE)
 
         leftCalendarButton.setOnClickListener {
-
-            //set Calendar Title
             if ((currentCalendar!![Calendar.YEAR] == todayYear) && (currentCalendar!![Calendar.MONTH] == todayMonth)) {
                 Toast.makeText(context, "You cannot go to previous month", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
@@ -275,15 +274,10 @@ class QubeCalendarView @JvmOverloads constructor(
                 12 -> {
                     setDatesForTwiceAMonth(startDate, maxdate)
                 }
-                13 -> {
-                    setDatesForEveryTwoMonths(startDate, maxdate)
+                13,14,15 -> {
+                    setDatesForMonthsInterval(startDate, maxdate)
                 }
-                14 -> {
-                    setDatesForQuarterly(startDate, maxdate)
-                }
-                15 -> {
-                    setDatesForSixMonths(startDate, maxdate)
-                }
+
             }
         } else if (CalendarUtils.selectedFrequency == 2) {
             when (CalendarUtils.selectedInterval) {
@@ -508,64 +502,8 @@ class QubeCalendarView @JvmOverloads constructor(
         }
     }
 
-    private fun setDatesForSixMonths(startDate: Int, maxdate: Int) {
-        val highLightedDate = if (selectedDateForMonthlyFrequency > 0) {
-            selectedDateForMonthlyFrequency
 
-        } else {
-            defaultSelectedDate!!
-        }
-        if (selectedYearForMonthlyFrequency == 0) {
-            selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
-        }
-
-        if (selectedMonthForMonthlyFrequency == -1) {
-            selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
-        }
-
-        for (i in startDate..maxdate) {
-            if ((highLightedDate == i && monthChanges == monthIntervalGap) &&
-                (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency)
-            ) {
-                if ((currentCalendar!![Calendar.YEAR] == selectedYearForMonthlyFrequency) &&
-                    (currentCalendar!![Calendar.MONTH] >= selectedMonthForMonthlyFrequency)
-                ) {
-                    if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==29)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==28)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if (highLightedDate == 31 && maxdate == 30 && i == 30) {
-                        // there are 30 days , selected day is 31 so next month last day should be highlighted
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    } else {
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                } else if (currentCalendar!![Calendar.YEAR] > selectedYearForMonthlyFrequency) {
-                    if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==29)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==28)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if (highLightedDate == 31 && maxdate == 30 && i == 30) {
-                        // there are 30 days , selected day is 31 so next month last day should be highlighted
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    } else {
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-
-                } else {
-                    list.add((CalendarDateModel(i.toString(), false, false)))
-                }
-            } else {
-                list.add((CalendarDateModel(i.toString(), false, false)))
-            }
-        }
-    }
-
-    private fun setDatesForQuarterly(startDate: Int, maxdate: Int) {
+    private fun setDatesForMonthsInterval(startDate: Int, maxdate: Int) {
         val highLightedDate = if (selectedDateForMonthlyFrequency > 0) {
             selectedDateForMonthlyFrequency
         } else {
@@ -580,107 +518,129 @@ class QubeCalendarView @JvmOverloads constructor(
             selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
         }
 
-        for (i in startDate..maxdate) {
-            if ((highLightedDate == i) && (monthChanges == monthIntervalGap) &&
-                (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency)
-            ) {
-
-                if ((currentCalendar!![Calendar.YEAR] == selectedYearForMonthlyFrequency) &&
-                    (currentCalendar!![Calendar.MONTH] >= selectedMonthForMonthlyFrequency)
-                ) {
-                    if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==29)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==28)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if (highLightedDate == 31 && maxdate == 30 && i == 30) {
-                        // there are 30 days , selected day is 31 so next month last day should be highlighted
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    } else {
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-
-                    }
-                } else if (currentCalendar!![Calendar.YEAR] > selectedYearForMonthlyFrequency) {
-                    if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==29)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==28)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if (highLightedDate == 31 && maxdate == 30 && i == 30) {
-                        // there are 30 days , selected day is 31 so next month last day should be highlighted
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    } else {
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-
-                    }
-
-                } else {
-                    list.add((CalendarDateModel(i.toString(), false, false)))
-                }
-            } else {
-                list.add((CalendarDateModel(i.toString(), false, false)))
+        if ((monthChanges==0)&&(monthIntervalGap==0)) {
+            if (CalendarUtils.selectedInterval == CalendarUtils.everyTwoMonth) {
+                monthChanges = 2
+                monthIntervalGap = 2
+            } else if (CalendarUtils.selectedInterval == CalendarUtils.quarterly) {
+                monthChanges = 4
+                monthIntervalGap = 4
+            } else if (CalendarUtils.selectedInterval == CalendarUtils.sixMonth) {
+                monthChanges = 6
+                monthIntervalGap = 6
             }
         }
-    }
+        Log.d("hello month",monthChanges.toString())
+        Log.d("hello gap",monthIntervalGap.toString())
 
-    private fun setDatesForEveryTwoMonths(startDate: Int, maxdate: Int) {
-        val highLightedDate = if (selectedDateForMonthlyFrequency > 0) {
-            selectedDateForMonthlyFrequency
-        } else {
-            defaultSelectedDate!!
-        }
-
-        if (selectedYearForMonthlyFrequency == 0) {
-            selectedYearForMonthlyFrequency = currentCalendar!![Calendar.YEAR]
-        }
-
-        if (selectedMonthForMonthlyFrequency == -1) {
-            selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
-        }
 
         for (i in startDate..maxdate) {
-            if ((highLightedDate == i) && (monthChanges == monthIntervalGap) &&
-                (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency) &&
-                (currentCalendar!![Calendar.MONTH] >= selectedMonthForMonthlyFrequency)
-            ) {
-                if ((currentCalendar!![Calendar.YEAR] == selectedYearForMonthlyFrequency) &&
-                    (currentCalendar!![Calendar.MONTH] >= selectedMonthForMonthlyFrequency)
-                ) {
-                    if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==29)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==28)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if (highLightedDate == 31 && maxdate == 30 && i == 30) {
-                        // there are 30 days , selected day is 31 so next month last day should be highlighted
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    } else {
-                        list.add((CalendarDateModel(i.toString(), false, true)))
 
-                    }
-                } else if (currentCalendar!![Calendar.YEAR] > selectedYearForMonthlyFrequency) {
-                    if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==29)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==28)&& (highLightedDate==30||highLightedDate==31)){
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    }
-                    else if (highLightedDate == 31 && maxdate == 30 && i == 30) {
-                        // there are 30 days , selected day is 31 so next month last day should be highlighted
-                        list.add((CalendarDateModel(i.toString(), false, true)))
-                    } else {
-                        list.add((CalendarDateModel(i.toString(), false, true)))
+           if ((currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency) &&
+               (monthChanges == monthIntervalGap)){
 
-                    }
-                } else {
-                    list.add((CalendarDateModel(i.toString(), false, false)))
+               if ((currentCalendar!![Calendar.YEAR] == selectedYearForMonthlyFrequency) &&
+                   (currentCalendar!![Calendar.MONTH] >= selectedMonthForMonthlyFrequency)
+               ){
+                   if (maxdate==31){
+                       if (i==highLightedDate){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else{
+                           list.add((CalendarDateModel(i.toString(), false, false)))
+                       }
+                   }
+                   else if (maxdate==30){
+                       if ((highLightedDate>=30)&&(i==30)){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else if (i==highLightedDate){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else{
+                           list.add((CalendarDateModel(i.toString(), false, false)))
+                       }
+                   }
+                   else if (maxdate==29){
+                       if ((highLightedDate>=29)&&(i==29)){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else if (i==highLightedDate){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else{
+                           list.add((CalendarDateModel(i.toString(), false, false)))
+                       }
+                   }
+                   else if (maxdate==28){
+                       if ((highLightedDate>=28)&&(i==28)){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else if (i==highLightedDate){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else{
+                           list.add((CalendarDateModel(i.toString(), false, false)))
+                       }
+                   }
                 }
-            } else {
-                list.add((CalendarDateModel(i.toString(), false, false)))
-            }
+              else if ((currentCalendar!![Calendar.YEAR] == selectedYearForMonthlyFrequency) &&
+                   (currentCalendar!![Calendar.MONTH] < selectedMonthForMonthlyFrequency)
+               ){
+                   list.add((CalendarDateModel(i.toString(), false, false)))
+               }
+               else if (currentCalendar!![Calendar.YEAR] < selectedYearForMonthlyFrequency){
+                   list.add((CalendarDateModel(i.toString(), false, false)))
+               }
+
+               else {
+                   //current year greater than selected year
+                   if (maxdate==31){
+                       if (i==highLightedDate){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else{
+                           list.add((CalendarDateModel(i.toString(), false, false)))
+                       }
+                   }
+                   else if (maxdate==30){
+                       if ((highLightedDate>=30)&&(i==30)){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else if (i==highLightedDate){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else{
+                           list.add((CalendarDateModel(i.toString(), false, false)))
+                       }
+                   }
+                   else if (maxdate==29){
+                       if ((highLightedDate>=29)&&(i==29)){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else if (i==highLightedDate){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else{
+                           list.add((CalendarDateModel(i.toString(), false, false)))
+                       }
+                   }
+                   else if (maxdate==28){
+                       if ((highLightedDate>=28)&&(i==28)){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else if (i==highLightedDate){
+                           list.add((CalendarDateModel(i.toString(), false, true)))
+                       }
+                       else{
+                           list.add((CalendarDateModel(i.toString(), false, false)))
+                       }
+                   }
+               }
+           }
+            else {
+               list.add((CalendarDateModel(i.toString(), false, false)))
+           }
         }
     }
 
@@ -698,12 +658,7 @@ class QubeCalendarView @JvmOverloads constructor(
             selectedMonthForMonthlyFrequency = currentCalendar!![Calendar.MONTH]
         }
         for (i in startDate..maxdate) {
-
-            if(currentCalendar!![Calendar.YEAR] < selectedYearForMonthlyFrequency){
-                //not selected date for previous year as compare to user selected year
-                list.add((CalendarDateModel(i.toString(), false, false)))
-            }
-            else if (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency){
+             if (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency){
 
                 if ((currentCalendar!![Calendar.YEAR] == selectedYearForMonthlyFrequency) &&
                     (currentCalendar!![Calendar.MONTH] >= selectedMonthForMonthlyFrequency)){
@@ -807,6 +762,10 @@ class QubeCalendarView @JvmOverloads constructor(
                 }
             }
 
+             else {
+                 //not selected date for previous year as compare to user selected year
+                 list.add((CalendarDateModel(i.toString(), false, false)))
+             }
 
         }
     }
@@ -816,3 +775,106 @@ class QubeCalendarView @JvmOverloads constructor(
 
 
 
+/*
+*  if (maxdate==31){
+                        if (i==highLightedDate){
+                            list.add((CalendarDateModel(i.toString(), false, true)))
+                        }
+                        else{
+                            list.add((CalendarDateModel(i.toString(), false, false)))
+                        }
+                    }
+                    else if (maxdate==30){
+
+                        if ((highLightedDate>=30)&&(i==30)){
+                            list.add((CalendarDateModel(i.toString(), false, true)))
+                        }
+                        else if (i==highLightedDate){
+                            list.add((CalendarDateModel(i.toString(), false, true)))
+                        }
+                        else{
+                            list.add((CalendarDateModel(i.toString(), false, false)))
+                        }
+
+                    }
+                    else if (maxdate==29){
+                        if ((highLightedDate>=29)&&(i==29)){
+                            list.add((CalendarDateModel(i.toString(), false, true)))
+                        }
+                        else if (i==highLightedDate){
+                            list.add((CalendarDateModel(i.toString(), false, true)))
+                        }
+                        else{
+                            list.add((CalendarDateModel(i.toString(), false, false)))
+                        }
+                    }
+                    else if (maxdate==28){
+                        if ((highLightedDate>=28)&&(i==28)){
+                            list.add((CalendarDateModel(i.toString(), false, true)))
+                        }
+                        else if (i==highLightedDate){
+                            list.add((CalendarDateModel(i.toString(), false, true)))
+                        }
+                        else{
+                            list.add((CalendarDateModel(i.toString(), false, false)))
+                        }
+                    }
+
+*
+* */
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+*
+*  if ((highLightedDate == i) && (monthChanges == monthIntervalGap) &&
+                (currentCalendar!![Calendar.YEAR] >= selectedYearForMonthlyFrequency) &&
+                (currentCalendar!![Calendar.MONTH] >= selectedMonthForMonthlyFrequency)
+            ) {
+                if ((currentCalendar!![Calendar.YEAR] == selectedYearForMonthlyFrequency) &&
+                    (currentCalendar!![Calendar.MONTH] >= selectedMonthForMonthlyFrequency)
+                ) {
+                    if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==29)&& (highLightedDate==30||highLightedDate==31)){
+                        list.add((CalendarDateModel(i.toString(), false, true)))
+                    }
+                    else if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==28)&& (highLightedDate==30||highLightedDate==31)){
+                        list.add((CalendarDateModel(i.toString(), false, true)))
+                    }
+                    else if (highLightedDate == 31 && maxdate == 30 && i == 30) {
+                        // there are 30 days , selected day is 31 so next month last day should be highlighted
+                        list.add((CalendarDateModel(i.toString(), false, true)))
+                    } else {
+                        list.add((CalendarDateModel(i.toString(), false, true)))
+
+                    }
+                } else if (currentCalendar!![Calendar.YEAR] > selectedYearForMonthlyFrequency) {
+                    if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==29)&& (highLightedDate==30||highLightedDate==31)){
+                        list.add((CalendarDateModel(i.toString(), false, true)))
+                    }
+                    else if ((currentCalendar!![Calendar.MONTH]==1)&&(maxdate==28)&& (highLightedDate==30||highLightedDate==31)){
+                        list.add((CalendarDateModel(i.toString(), false, true)))
+                    }
+                    else if (highLightedDate == 31 && maxdate == 30 && i == 30) {
+                        // there are 30 days , selected day is 31 so next month last day should be highlighted
+                        list.add((CalendarDateModel(i.toString(), false, true)))
+                    } else {
+                        list.add((CalendarDateModel(i.toString(), false, true)))
+
+                    }
+                } else {
+                    list.add((CalendarDateModel(i.toString(), false, false)))
+                }
+            } else {
+                list.add((CalendarDateModel(i.toString(), false, false)))
+            }
+* */
